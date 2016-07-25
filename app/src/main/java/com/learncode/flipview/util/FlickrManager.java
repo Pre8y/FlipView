@@ -18,7 +18,7 @@ public class FlickrManager {
     public static final String FLICKR_BASE_URL = "https://api.flickr.com";
 
     //You can set here your API_KEY
-    public static final String APIKEY_SEARCH_STRING = "e4b54be8bc1646ad170ffa2de2942fbf";
+    public static final String APIKEY_SEARCH_STRING = "";
 
 
 
