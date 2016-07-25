@@ -95,12 +95,11 @@ public class MainActivity extends AppCompatActivity {
         //url
         //https://api.flickr.com/services/rest/?method=flickr.photos.search&name=value&api_key=e4b54be8bc1646ad170ffa2de2942fbf&format=json&tags=computer
 
-        Fliputils.showProgressDialog(this, "");
         if (FlickrManager.APIKEY_SEARCH_STRING.isEmpty()) {
             Toast.makeText(getApplicationContext(), "Please obtain your API KEY first from flickr.com", Toast.LENGTH_LONG).show();
             return;
         }
-
+        Fliputils.showProgressDialog(this, "");
         ApiInterface apiService =
                 FlickrManager.getClient().create(ApiInterface.class);
 
