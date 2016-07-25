@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">FlipView</string>
+    <string name="search_hint">Search</string>
+    <string name="default_key">Computers</string>
+</resources>
