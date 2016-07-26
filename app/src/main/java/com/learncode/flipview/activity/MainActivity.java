@@ -4,6 +4,9 @@ import java.util.ArrayList;
 
 import android.app.SearchManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Messenger;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -168,6 +171,16 @@ public class MainActivity extends AppCompatActivity {
         searchView.setOnQueryTextListener(queryTextListener);
         return true;
     }
+
+    class ResponseHandler extends Handler {
+        @Override public void handleMessage(Message message) {
+            Toast.makeText(MainActivity.this, "message from service",
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+    Messenger messenger = new Messenger(new ResponseHandler());
+
+
 
 
 }
