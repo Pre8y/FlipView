@@ -2,11 +2,13 @@ package com.learncode.flipview.activity;
 
 import java.util.ArrayList;
 
+import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.SearchManager;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.os.Messenger;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -42,13 +44,14 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView listView;
 
     DataAdapter mAdapter;
-    ArrayList<FlickrPhoto> dataList;
+    ArrayList<FlickrPhoto> dataList = new ArrayList<FlickrPhoto>();
 
     LayoutManager layoutManager;
 
     Toolbar toolbar;
     FlipPreferenceManager mPreferenceManager;
 
+    String tag ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,27 +61,33 @@ public class MainActivity extends AppCompatActivity {
         initToolBar();
 
 
-        dataList = new ArrayList<FlickrPhoto>();
-        mAdapter = new DataAdapter(this, dataList);
-        layoutManager = new GridLayoutManager(this, 2, LinearLayoutManager.VERTICAL, false);
 
-        listView.setLayoutManager(layoutManager);
-        listView.setAdapter(mAdapter);
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
 
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
 
-        mAdapter.setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onItemClick(int position) {
+                // Show an expanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+            } else {
+
+                // No explanation needed, we can request the permission.
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        100);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
             }
-        });
-
-        mPreferenceManager = FlipPreferenceManager.instance(this);
-        String tag = mPreferenceManager.getLastSearch();
-        if(!TextUtils.isEmpty(tag)) {
-            loadPhotoFromFlickr(tag);
-        }else
-        {
-            loadPhotoFromFlickr(getString(R.string.default_key));
+        }else{
+            loadPhotoFromFlickr();
         }
 
     }
@@ -94,7 +103,33 @@ public class MainActivity extends AppCompatActivity {
         return datas;
     }
 
-    private void loadPhotoFromFlickr(String tag) {
+    private void loadPhotoFromFlickr() {
+
+
+
+        if(mAdapter==null) {
+            mAdapter = new DataAdapter(this, dataList);
+            layoutManager = new GridLayoutManager(this, 2, LinearLayoutManager.VERTICAL, false);
+            listView.setLayoutManager(layoutManager);
+            listView.setAdapter(mAdapter);
+            mAdapter.setOnItemClickListener(new OnItemClickListener() {
+                @Override
+                public void onItemClick(int position) {
+                }
+            });
+        }
+
+
+
+
+        mPreferenceManager = FlipPreferenceManager.instance(this);
+        tag = mPreferenceManager.getLastSearch();
+        if(TextUtils.isEmpty(tag))
+        {
+            tag = getString(R.string.default_key);
+        }
+
+
         //url
         //https://api.flickr.com/services/rest/?method=flickr.photos.search&name=value&api_key=e4b54be8bc1646ad170ffa2de2942fbf&format=json&tags=computer
 
@@ -163,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
                 //Here u can get the value "query" which is entered in the search box.
                 if(!TextUtils.isEmpty(query)) {
                     mPreferenceManager.setLastSearch(query);
-                    loadPhotoFromFlickr(query);
+                    loadPhotoFromFlickr();
                 }
                 return true;
             }
@@ -172,15 +207,23 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    class ResponseHandler extends Handler {
-        @Override public void handleMessage(Message message) {
-            Toast.makeText(MainActivity.this, "message from service",
-                    Toast.LENGTH_SHORT).show();
+    @TargetApi(23)
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case 100:
+                if (grantResults.length > 0
+                        || grantResults[0] == PackageManager.PERMISSION_GRANTED
+                        || grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                   loadPhotoFromFlickr();
+
+                } else {
+                    Toast.makeText(MainActivity.this, "Image loading will not work", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+                //return; // delete.
         }
     }
-    Messenger messenger = new Messenger(new ResponseHandler());
-
-
 
 
 }
